@@ -13,7 +13,9 @@ This should be verey similar to the how training is done in the LTR toy program.
 :param dictionary xgb_params The XGBoost configuration parameters, such as the objective function, e.g. {'objective': 'reg:logistic'} 
 '''
 def train(xgb_train_data, num_rounds=5, xgb_params=None ):
-    bst = xgb.train(xgb_params, xgb_train_data,
+    dtrain = xgb.DMatrix(f'{xgb_train_data}?format=libsvm')
+
+    bst = xgb.train(xgb_params, dtrain,
                 num_rounds) 
     return bst 
     
