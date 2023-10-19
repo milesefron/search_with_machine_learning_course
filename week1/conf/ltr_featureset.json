@@ -12,6 +12,130 @@
             "name": "{{keywords}}"
           }
         }
+      },
+      {
+        "name": "name_phrase_match",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match_phrase": {    
+            "name": "{{keywords}}"        
+          }
+        }
+      },
+      {
+        "name": "artist_phrase_match",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match_phrase": {    
+            "artistName": "{{keywords}}"        
+          }
+        }
+      },
+      {
+        "name": "short_desc_phrase_match",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match_phrase": {    
+            "shortDescription": "{{keywords}}"        
+          }
+        }
+      },
+      {
+        "name": "long_desc_phrase_match",
+        "params": [
+          "keywords"
+        ],
+        "template_language": "mustache",
+        "template": {
+          "match_phrase": {    
+            "longDescription": "{{keywords}}"        
+          }
+        }
+      },
+      {
+        "name": "customer_review_avg",
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "functions": [{
+              "field_value_factor": {
+                "field": "customerReviewAverage",
+                "missing": 1
+              }
+            }],
+            "query": {
+              "match_all": {}
+            }
+          }
+        }
+      },
+      {
+        "name": "customer_review_count",
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "functions": [{
+              "field_value_factor": {
+                "field": "customerReviewCount",
+                "missing": 0
+              }
+            }],
+            "query": {
+              "match_all": {}
+            }
+          }
+        }
+      },
+      {
+        "name": "salesRankShortTerm",
+        "template_language": "mustache",
+        "template": {
+          "function_score": {
+            "functions": [
+              {
+                "filter": {
+                  "exists": {
+                    "field": "salesRankShortTerm"
+                  }
+                },
+                "gauss": {
+                  "salesRankShortTerm": {
+                    "origin": "1.0",
+                    "offset": "100",
+                    "scale": "10000",
+                    "decay": "0.1"
+                  }
+                }
+              },
+              {
+                "filter": {
+                  "bool": {
+                    "must_not": {
+                      "exists": {
+                        "field": "salesRankShortTerm"
+                      }
+                    }
+                  }
+                },
+                "script_score": {
+                  "script": "if (doc['salesRankShortTerm'] == null || doc['salesRankShortTerm'].size() == 0  ){return 0.0}"
+                }
+              }
+            ],
+            "query": {
+              "match_all": {}
+            }
+          }
+        }
       }
     ]
   }

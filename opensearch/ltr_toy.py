@@ -166,7 +166,7 @@ print("\tUpload our features to the LTR storage")
 ltr_feature_set = {"featureset": {
     "features": [
         {  # Instead of using our multifield query_string match, break it out into parts
-            "name": title_query_feature_name,
+            "name": open /workspace/ltr_output/ltr_model_tree.png,
             "params": ["keywords"],
             "template_language": "mustache",
             "template": {

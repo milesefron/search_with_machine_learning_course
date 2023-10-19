@@ -1,6 +1,6 @@
 import xgboost as xgb
 from xgboost import plot_importance, plot_tree
-
+import json
 
 ##### Step 3.a
 '''
@@ -104,10 +104,11 @@ def create_rescore_ltr_query(user_query: str, query_obj, click_prior_query: str,
                         "keywords": user_query
                     },
                     "model": ltr_model_name,
-                    "store": ltr_store_name,
-                    "active_features": [title_query_feature_name, body_query_feature_name, price_func_feature_name]
+                    "store": ltr_store_name
                 }
             },
+            "score_mode": "total",
+            "query_weight": main_query_weight,
             "rescore_query_weight": rescore_query_weight 
         }
     }
@@ -135,6 +136,12 @@ def extract_logged_features(hits, query_id):
         feature_results["doc_id"].append(int(hit['_id']))  # capture the doc id so we can join later
         feature_results["query_id"].append(query_id)  # super redundant, but it will make it easier to join later
         feature_results["sku"].append(int(hit['_id']))
-        feature_results["name_match"].append(rng.random())
+
+        #js = json.dumps(hit, indent=2)
+        #print(js)
+        # handle logged LTR features
+        for entry in hit['fields']['_ltrlog'][0]['log_entry']:
+            feature_results[entry['name']] = entry['value']
+
     frame = pd.DataFrame(feature_results)
     return frame.astype({'doc_id': 'int64', 'query_id': 'int64', 'sku': 'int64'})
