@@ -20,11 +20,8 @@
         ],
         "template_language": "mustache",
         "template": {
-          "match_phrase": {
-            "name": {
-              "query": "{{keywords}}",
-              "slop": 6 
-            }
+          "match_phrase": {    
+            "name": "{{keywords}}"        
           }
         }
       },
@@ -35,11 +32,8 @@
         ],
         "template_language": "mustache",
         "template": {
-          "match_phrase": {
-            "artistName": {
-              "query": "{{keywords}}",
-              "slop": 6 
-            }
+          "match_phrase": {    
+            "artistName": "{{keywords}}"        
           }
         }
       },
@@ -50,11 +44,8 @@
         ],
         "template_language": "mustache",
         "template": {
-          "match_phrase": {
-            "shortDescription": {
-              "query": "{{keywords}}",
-              "slop": 6 
-            }
+          "match_phrase": {    
+            "shortDescription": "{{keywords}}"        
           }
         }
       },
@@ -65,11 +56,8 @@
         ],
         "template_language": "mustache",
         "template": {
-          "match_phrase": {
-            "longDescription": {
-              "query": "{{keywords}}",
-              "slop": 6 
-            }
+          "match_phrase": {    
+            "longDescription": "{{keywords}}"        
           }
         }
       },
@@ -108,7 +96,7 @@
         }
       },
       {
-        "name": "instructors_salesRank_feature",
+        "name": "salesRankShortTerm",
         "template_language": "mustache",
         "template": {
           "function_score": {
@@ -145,80 +133,7 @@
             ],
             "query": {
               "match_all": {}
-            },
-            "boost_mode": "multiply"
-          }
-        }
-      },
-      {
-        "name": "salesRank_short_term_feature",
-        "template_language": "mustache",
-        "template": {
-          "function_score": {
-            "functions": [
-              {
-                "gauss": {
-                  "salesRankShortTerm": {
-                    "origin": "1.0",
-                    "offset": "100",
-                    "scale": "10000",
-                    "decay": "0.1"
-                  }
-                }
-              }
-            ],
-            "query": {
-              "match_all": {}
-            },
-            "boost_mode": "multiply"
-          }
-        }
-      },
-      {
-        "name": "salesRank_long_term_feature",
-        "template_language": "mustache",
-        "template": {
-          "function_score": {
-            "functions": [
-              {
-                "gauss": {
-                  "salesRankLongTerm": {
-                    "origin": "1.0",
-                    "offset": "100",
-                    "scale": "10000",
-                    "decay": "0.1"
-                  }
-                }
-              }
-            ],
-            "query": {
-              "match_all": {}
-            },
-            "boost_mode": "multiply"
-          }
-        }
-      },
-      {
-        "name": "active_feature",
-        "params": [
-          "keywords"
-        ],
-        "template_language": "mustache",
-        "template": {
-          "match": {
-            "active": "true"
-          }
-        }
-      },
-      {
-        "name": "availability_feature",
-        "params": [
-          "keywords"
-        ],
-        "template_language": "mustache",
-        "template": {
-          "match": {
-            "onlineAvailability": "true"
+            }
           }
         }
       }
