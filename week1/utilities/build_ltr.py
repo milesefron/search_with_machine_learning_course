@@ -357,6 +357,8 @@ if __name__ == "__main__":
     if args.xgb_test:
         # To test, we're going to calculate MAP by looking at how many "relevant" documents were in the top X of
         # our result set.
+        print("NUM QUERIES")
+        print(args.xgb_test_num_queries)
         test_data = pd.read_csv(args.xgb_test, parse_dates=['click_time', 'query_time'])
         train_df = None
         # we use the training file for priors, but we must make sure we don't have leaks
