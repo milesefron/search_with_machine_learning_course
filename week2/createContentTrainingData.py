@@ -37,6 +37,8 @@ names_as_labels = False
 if args.label == 'name':
     names_as_labels = True
 
+cat_counts = {}
+
 def _label_filename(filename):
     tree = ET.parse(filename)
     root = tree.getroot()
@@ -48,22 +50,34 @@ def _label_filename(filename):
             child.find('categoryPath')[len(child.find('categoryPath')) - 1][0].text is not None and
             child.find('categoryPath')[0][0].text == 'cat00000' and
             child.find('categoryPath')[1][0].text != 'abcat0600000'):
-              # Choose last element in categoryPath as the leaf categoryId or name
-              if names_as_labels:
-                  cat = child.find('categoryPath')[len(child.find('categoryPath')) - 1][1].text.replace(' ', '_')
-              else:
-                  cat = child.find('categoryPath')[len(child.find('categoryPath')) - 1][0].text
-              # Replace newline chars with spaces so fastText doesn't complain
-              name = child.find('name').text.replace('\n', ' ')
-              labels.append((cat, transform_name(name)))
+                # Choose last element in categoryPath as the leaf categoryId or name
+                if names_as_labels:
+                    cat = child.find('categoryPath')[len(child.find('categoryPath')) - 1][1].text.replace(' ', '_')
+                else:
+                    cat = child.find('categoryPath')[len(child.find('categoryPath')) - 1][0].text
+                # Replace newline chars with spaces so fastText doesn't complain
+                name = child.find('name').text.replace('\n', ' ')
+                labels.append((cat, transform_name(name)))
+
+                if cat in cat_counts:
+                    cat_counts[cat] += 1
+                else:
+                    cat_counts[cat] = 1
+
     return labels
 
 if __name__ == '__main__':
     files = glob.glob(f'{directory}/*.xml')
     print("Writing results to %s" % output_file)
-    with multiprocessing.Pool() as p:
-        all_labels = tqdm(p.imap(_label_filename, files), total=len(files))
-        with open(output_file, 'w') as output:
-            for label_list in all_labels:
-                for (cat, name) in label_list:
+    all_labels = []
+    for file in files:
+        print(file)
+        all_labels.append(_label_filename(file))
+
+    with open(output_file, 'w') as output:
+        for label_list in all_labels:
+            for (cat, name) in label_list:
+                if cat_counts[cat] > min_products+1:
                     output.write(f'__label__{cat} {name}\n')
+
+    
