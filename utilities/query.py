@@ -212,6 +212,8 @@ if __name__ == "__main__":
                          help='The OpenSearch port')
     general.add_argument('--user',
                          help='The OpenSearch admin.  If this is set, the program will prompt for password too. If not set, use default of admin/admin')
+    general.add_argument('--synonyms', 
+                         help="Whether or not to use synonyms")
 
     args = parser.parse_args()
 

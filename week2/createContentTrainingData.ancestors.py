@@ -8,13 +8,13 @@ from pathlib import Path
 import json
 import re
 
-f = open('/workspace/datasets/fasttext/products_cat_freqs.names.json', 'r')
+f = open('/workspace/datasets/fasttext/products_cat_freqs.json', 'r')
 cat_counts = json.load(f)
 f.close()
 
 def transform_name(product_name):
     #product_name = re.sub('\W+', ' ', product_name).replace('  ', ' ').strip()
-    #product_name = product_name.strip() + ' ' + product_name.strip().lower()
+    #product_name = product_name + ' ' + product_name.strip()
     return product_name
 
 # Directory for product data
@@ -55,20 +55,25 @@ def _label_filename(filename):
             child.find('categoryPath')[len(child.find('categoryPath')) - 1][0].text is not None and
             child.find('categoryPath')[0][0].text == 'cat00000' and
             child.find('categoryPath')[1][0].text != 'abcat0600000'):
-                # Choose last element in categoryPath as the leaf categoryId or name
-                if names_as_labels:
-                    cat = child.find('categoryPath')[len(child.find('categoryPath')) - 1][1].text.replace(' ', '_')
-                else:
-                    cat = child.find('categoryPath')[len(child.find('categoryPath')) - 1][0].text
-            
-                # skip rare categories
-                if cat_counts[cat] < min_products:
-                    print('skipping cat: ' + cat + ' with freq: ' + str(cat_counts[cat]))
-                    continue
 
-                # Replace newline chars with spaces so fastText doesn't complain
-                name = child.find('name').text.replace('\n', ' ')
-                labels.append((cat, transform_name(name)))
+                i = 0
+                while len(child.find('categoryPath')) - i >= 0:
+                    i += 1
+                    # Choose last element in categoryPath as the leaf categoryId or name
+                    if names_as_labels:
+                        cat = child.find('categoryPath')[len(child.find('categoryPath')) - i][1].text.replace(' ', '_')
+                    else:
+                        cat = child.find('categoryPath')[len(child.find('categoryPath')) - i][0].text
+                    # Replace newline chars with spaces so fastText doesn't complain
+
+                    if cat in cat_counts and cat_counts[cat] > min_products+1:
+                        name = child.find('name').text.replace('\n', ' ')
+                        labels.append((cat, transform_name(name)))
+                        
+                        if i > 1:
+                            print(f'{str(i)}: {cat}, {filename} :: {name}')
+                        break
+          
     return labels
 
 if __name__ == '__main__':
