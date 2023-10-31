@@ -4,6 +4,16 @@ import xml.etree.ElementTree as ET
 import pandas as pd
 import numpy as np
 import csv
+import re
+
+
+# IMPLEMENT ME: Convert queries to lowercase, and optionally implement other normalization, like stemming.
+def normalize_query(query):
+    query = query.lower()
+    query = re.sub('\W', ' ', query)
+    query = re.sub('\s+', ' ', query)
+    query = ' '.join([stemmer.stem(term) for term in query.split()])
+    return query
 
 # Useful if you want to perform stemming.
 import nltk
@@ -47,8 +57,9 @@ parents_df = pd.DataFrame(list(zip(categories, parents)), columns =['category', 
 # Read the training data into pandas, only keeping queries with non-root categories in our category tree.
 queries_df = pd.read_csv(queries_file_name)[['category', 'query']]
 queries_df = queries_df[queries_df['category'].isin(categories)]
+queries_df['normalized_query'] = queries_df.apply(lambda row: normalize_query(row['query']), axis=1)
 
-# IMPLEMENT ME: Convert queries to lowercase, and optionally implement other normalization, like stemming.
+
 
 # IMPLEMENT ME: Roll up categories to ancestors to satisfy the minimum number of queries per category.
 
@@ -57,5 +68,6 @@ queries_df['label'] = '__label__' + queries_df['category']
 
 # Output labeled query data as a space-separated file, making sure that every category is in the taxonomy.
 queries_df = queries_df[queries_df['category'].isin(categories)]
-queries_df['output'] = queries_df['label'] + ' ' + queries_df['query']
+# queries_df['output'] = queries_df['label'] + ' ' + queries_df['query']
+queries_df['output'] = queries_df['label'] + ' ' + queries_df['normalized_query']
 queries_df[['output']].to_csv(output_file_name, header=False, sep='|', escapechar='\\', quoting=csv.QUOTE_NONE, index=False)
