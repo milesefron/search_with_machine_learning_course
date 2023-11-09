@@ -21,9 +21,13 @@ logger.setLevel(logging.INFO)
 logging.basicConfig(format='%(levelname)s:%(message)s')
 
 # IMPLEMENT ME: import the sentence transformers module!
+import sentence_transformers
 
 logger.info("Creating Model")
 # IMPLEMENT ME: instantiate the sentence transformer model!
+from sentence_transformers import SentenceTransformer
+model = SentenceTransformer('all-MiniLM-L6-v2')
+
 
 # NOTE: this is not a complete list of fields.  If you wish to add more, put in the appropriate XPath expression.
 #TODO: is there a way to do this using XPath/XSL Functions so that we don't have to maintain a big list?
@@ -129,6 +133,7 @@ def index_file(file, index_name, reduced=False):
             xpath_expr = mappings[idx]
             key = mappings[idx + 1]
             doc[key] = child.xpath(xpath_expr)
+        
         #print(doc)
         if 'productId' not in doc or len(doc['productId']) == 0:
             continue
@@ -138,8 +143,13 @@ def index_file(file, index_name, reduced=False):
             continue
         docs.append({'_index': index_name, '_id':doc['sku'][0], '_source' : doc})
         #docs.append({'_index': index_name, '_source': doc})
+        names.append(doc['name'])
         docs_indexed += 1
         if docs_indexed % 200 == 0:
+            # get our embeddings and add them to the docs
+            embeddings = model.encode(names)
+            for doc, embedding in zip(docs, embeddings):
+                doc['embedding'] = embedding
             logger.info("Indexing")
             bulk(client, docs, request_timeout=60)
             logger.info(f'{docs_indexed} documents indexed')
