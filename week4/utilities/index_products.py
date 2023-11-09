@@ -143,19 +143,25 @@ def index_file(file, index_name, reduced=False):
             continue
         docs.append({'_index': index_name, '_id':doc['sku'][0], '_source' : doc})
         #docs.append({'_index': index_name, '_source': doc})
-        names.append(doc['name'])
+        names.append(doc['name'][0])
         docs_indexed += 1
         if docs_indexed % 200 == 0:
             # get our embeddings and add them to the docs
+            #for name in names:
+            #    logger.info(name)
             embeddings = model.encode(names)
             for doc, embedding in zip(docs, embeddings):
-                doc['embedding'] = embedding
+                doc['_source']['embedding'] = embedding
+                #logger.info(doc['embedding'])
             logger.info("Indexing")
             bulk(client, docs, request_timeout=60)
             logger.info(f'{docs_indexed} documents indexed')
             docs = []
             names = []
     if len(docs) > 0:
+        embeddings = model.encode(names)
+        for doc, embedding in zip(docs, embeddings):
+            doc['_source']['embedding'] = embedding
         bulk(client, docs, request_timeout=60)
         logger.info(f'{docs_indexed} documents indexed')
     return docs_indexed
