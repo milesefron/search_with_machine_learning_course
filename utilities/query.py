@@ -24,11 +24,9 @@ logging.basicConfig(format='%(levelname)s:%(message)s')
 
 def create_vector_query(user_query):
         embeddings = model.encode([user_query])
-        embedding = list(embeddings[0])
-        embedding = []
-        for i in range(384):
-            embedding[i] = float(i)
-            
+        embedding = embeddings[0]
+        
+
         query_obj = {
             "size": 10,
             "query": {
@@ -40,6 +38,7 @@ def create_vector_query(user_query):
                 }
             }
         }
+
         #query_obj["query"] = { 
         #    "match": { 
         #        "name": "tv"
