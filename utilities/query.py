@@ -24,11 +24,12 @@ logging.basicConfig(format='%(levelname)s:%(message)s')
 
 def create_vector_query(user_query):
         embeddings = model.encode([user_query])
-        embedding = embeddings[0]
-        
+        embedding = embeddings[0].tolist()
+    
 
         query_obj = {
             "size": 10,
+            "_source": True,
             "query": {
                 "knn": {
                     "embedding": {
@@ -39,13 +40,6 @@ def create_vector_query(user_query):
             }
         }
 
-        #query_obj["query"] = { 
-        #    "match": { 
-        #        "name": "tv"
-        #    }
-        #}
-        
-        print(query_obj)
         return query_obj
 
 
